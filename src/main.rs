@@ -1,4 +1,5 @@
 use core::str;
+use log::info;
 use std::str::Lines;
 
 use clap::Parser;
@@ -16,9 +17,10 @@ enum Rotation {
 }
 
 fn main() {
+    env_logger::init();
     let args = Args::parse();
 
-    println!("problem: {:?}, path: {:?}", args.problem, args.path);
+    info!("problem: {:?}, path: {:?}", args.problem, args.path);
 
     let input =
         std::fs::read_to_string(args.path).expect("Expected file at path to contain a string");
@@ -39,35 +41,27 @@ fn day_one(lines: Lines) -> i32 {
 
     let instructions = lines.map(|l| get_instruction_from_line(l));
 
-    println!("Position starts at {}", position);
+    info!("Position starts at {}", position);
 
     for instruction in instructions {
         let steps = match instruction {
-            Ok(Rotation::Right(s)) => s,
-            Ok(Rotation::Left(s)) => -s,
-            Err(_) => panic!(),
+            Rotation::Right(s) => s,
+            Rotation::Left(s) => -s,
         };
 
         let start = position;
         let end = (position + steps).rem_euclid(100);
 
-        let zero_crossings = if steps > 0 {
-            let dist_to_first_zero = if start == 0 { 100 } else { 100 - start };
+        let abs_steps = steps.abs();
+        let dist_to_first_zero = match (steps, start) {
+            (_, 0) => 100,
+            (steps, start) if steps > 0 => 100 - start,
+            (steps, start) if steps < 0 => start,
+            _ => 0,
+        };
 
-            if steps >= dist_to_first_zero {
-                1 + ((steps - dist_to_first_zero) / 100)
-            } else {
-                0
-            }
-        } else if steps < 0 {
-            let abs_steps = steps.abs();
-            let dist_to_first_zero = if start == 0 { 100 } else { start };
-
-            if abs_steps >= dist_to_first_zero {
-                1 + ((abs_steps - dist_to_first_zero) / 100)
-            } else {
-                0
-            }
+        let zero_crossings = if abs_steps >= dist_to_first_zero {
+            1 + ((abs_steps - dist_to_first_zero) / 100)
         } else {
             0
         };
@@ -75,7 +69,7 @@ fn day_one(lines: Lines) -> i32 {
         count += zero_crossings;
         position = end;
 
-        println!(
+        info!(
             "steps {}, start {}, end {}, zero_crossings {}, total count {}",
             steps, start, position, zero_crossings, count
         )
@@ -84,8 +78,8 @@ fn day_one(lines: Lines) -> i32 {
     count
 }
 
-fn get_instruction_from_line(line: &str) -> Result<Rotation, &str> {
-    println!("instruction {}", line);
+fn get_instruction_from_line(line: &str) -> Rotation {
+    info!("instruction {}", line);
     let mut chars = line.chars();
 
     let head = chars.nth(0);
@@ -94,8 +88,8 @@ fn get_instruction_from_line(line: &str) -> Result<Rotation, &str> {
     let parsed_tail: i32 = tail.parse().expect("could not parse step as i32");
 
     match head {
-        Some('R') => Ok(Rotation::Right(parsed_tail)),
-        Some('L') => Ok(Rotation::Left(parsed_tail)),
-        _ => Err("Invalid direction"),
+        Some('R') => Rotation::Right(parsed_tail),
+        Some('L') => Rotation::Left(parsed_tail),
+        _ => panic!("Invalid rotation encountered"),
     }
 }
