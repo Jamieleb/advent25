@@ -1,3 +1,4 @@
+use std::str;
 use std::vec;
 
 use log::debug;
@@ -30,7 +31,7 @@ fn get_invalid_ids_in_range(range: &str) -> Vec<u64> {
             let pattern = &num_str[..i];
             let mut chunks = num_str.as_bytes().chunks(pattern.len());
 
-            if chunks.all(|c| std::str::from_utf8(c).unwrap() == pattern) {
+            if chunks.all(|c| str::from_utf8(c).unwrap() == pattern) {
                 invalid_ids.push(num);
                 break;
             }

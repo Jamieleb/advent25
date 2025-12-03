@@ -3,12 +3,14 @@ use log::info;
 use clap::Parser;
 
 mod day_one;
+mod day_three;
 mod day_two;
 
 #[derive(Parser)]
 struct Args {
     problem: String,
     path: std::path::PathBuf,
+    num_batteries: usize,
 }
 
 fn main() {
@@ -23,6 +25,7 @@ fn main() {
     let answer: u64 = match args.problem.as_str() {
         "dayOne" => day_one::solution(input),
         "dayTwo" => day_two::solution(input),
+        "dayThree" => day_three::solution(input, args.num_batteries),
         _ => panic!("problem solution not found"),
     };
 
