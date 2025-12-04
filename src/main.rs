@@ -2,6 +2,7 @@ use log::info;
 
 use clap::Parser;
 
+mod day_four;
 mod day_one;
 mod day_three;
 mod day_two;
@@ -10,6 +11,7 @@ mod day_two;
 struct Args {
     problem: String,
     path: std::path::PathBuf,
+    #[arg(short = 'b', long, default_value = "2")]
     num_batteries: usize,
 }
 
@@ -26,6 +28,7 @@ fn main() {
         "dayOne" => day_one::solution(input),
         "dayTwo" => day_two::solution(input),
         "dayThree" => day_three::solution(input, args.num_batteries),
+        "dayFour" => day_four::solution(input),
         _ => panic!("problem solution not found"),
     };
 
